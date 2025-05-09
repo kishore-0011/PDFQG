@@ -1,16 +1,16 @@
 import UserModel  from "../models/user.models";
-import { AuthResponse, LoginUserDto, RegisterUserDto } from "../types/auth.types";
+import { AuthResponse, LoginUserDto, RegisterUserDto, UserData } from "../types/auth.types";
 import { generateToken } from "../utils/jwt.utils";
 import { comparePassword, hashPassword } from "../utils/password.utils";
 
 
 
 class AuthService {
-  /**
-   * Register a new user
-   * @param userData User registration data
-   * @returns Authentication response with token and user info
-   */
+  // 
+  //  User registeration
+  //  @param User registration data
+  //  @returns Authentication response with token and user info
+  // 
   async register(userData: RegisterUserDto): Promise<AuthResponse> {
     const { username, email, password, fullName } = userData;
     
@@ -26,13 +26,13 @@ class AuthService {
       throw new Error('Username already in use');
     }
     
-    // Hash the password
+    
     const hashedPassword = await hashPassword(password);
     
-    // Create the user
+    
     const user = await UserModel.create(username, email, hashedPassword, fullName);
     
-    // Generate JWT token
+    
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -42,11 +42,11 @@ class AuthService {
     return { token, user };
   }
   
-  /**
-   * Login an existing user
-   * @param loginData User login data
-   * @returns Authentication response with token and user info
-   */
+  
+    //  User login
+    //  @param User login data
+    //  @returns Authentication response with token and user info
+   
   async login(loginData: LoginUserDto): Promise<AuthResponse> {
     const { email, password } = loginData;
     
@@ -62,14 +62,14 @@ class AuthService {
       throw new Error('Invalid email or password');
     }
     
-    // Generate JWT token
+    
     const token = generateToken({
       userId: user.id,
       email: user.email,
       username: user.username
     });
     
-    // Return user data (excluding password)
+    
     const { password: _, ...userWithoutPassword } = user;
     
     return { 
@@ -82,6 +82,32 @@ class AuthService {
       }
     };
   }
+
+  // Get current user information by user id
+  // @params userId of the user to retrieve
+  // @returns userdata without password
+    
+  async getCurrentUser(userId: string): Promise<UserData>{
+
+    const user = await UserModel.findById(userId)
+    if (!user){
+      throw new Error('User not Found');
+    }
+    return{
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      fullName: user.fullName
+    };
+  }
+
+  // user logout
+
+  async logout(): Promise<{message: string}> {
+  
+    return {message: 'Logged out successfully'}
+  }
+
 }
 
 export default new AuthService();

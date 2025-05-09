@@ -10,11 +10,11 @@ const PORT = process.env.PORT || 5001;
 
 (async () => {
   try {
-    // First check if we can connect to the database
+    
     const isConnected = await checkDatabaseConnection();
     
     if (isConnected) {
-      // Then initialize tables
+     
       await initializeDatabase();
       console.log('Database setup completed');
     } else {
@@ -22,8 +22,6 @@ const PORT = process.env.PORT || 5001;
     }
   } catch (error) {
     console.error('Database setup failed:', error);
-    // Don't exit process to allow API to run even if DB is not available
-    console.error('Server will start but database features will not work correctly.');
   }
 })();
 
