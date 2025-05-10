@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node src/server.ts",
-    "create-db": "node scripts/create-database.js"
+    "create-db": "node scripts/create-database.js",
+    "migrate": "ts-node src/scripts/run.migrations.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.15.16",
     "@types/pg": "^8.15.0",
     "@types/uuid": "^10.0.0",
@@ -28,6 +30,7 @@
     "bcrypt": "^5.1.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2",
     "pg": "^8.15.6",
     "uuid": "^11.1.0"
   }
