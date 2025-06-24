@@ -27,7 +27,6 @@ async function createDatabase() {
 
   try {
     await client.connect();
-    console.log('Connected to PostgreSQL');
     
     // Check if database already exists
     const checkResult = await client.query(

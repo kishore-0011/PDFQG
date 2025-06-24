@@ -34,9 +34,7 @@ export const initializeDatabase = async (): Promise<void> => {
       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
     
-    console.log('Database tables initialized successfully');
   } catch (error) {
-    console.error('Error initializing database tables:', error);
     throw error;
   }
 };
@@ -45,7 +43,6 @@ export const initializeDatabase = async (): Promise<void> => {
 export const checkDatabaseConnection = async (): Promise<boolean> => {
   try {
     const client = await pool.connect();
-    console.log('Successfully connected to the PostgreSQL database');
     client.release();
     return true;
   } catch (err) {
