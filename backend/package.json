@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node src/server.ts",
-    "create-db": "node scripts/create-database.js"
+    "create-db": "node scripts/create-database.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
