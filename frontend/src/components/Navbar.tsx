@@ -44,7 +44,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-4 flex-shrink-0">
           {/* CTA Button */}
           <Link
-            to="/loginsignup"
+            to="/getting-started"
             className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 sm:px-6 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all text-sm sm:text-base"
           >
             <span className="hidden sm:inline">Try it free</span>

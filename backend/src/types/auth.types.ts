@@ -33,4 +33,6 @@ export interface UserData{
     username: string;
     email: string;
     fullName?: string;
+    plan: 'free' | 'pro' | 'enterprise';
+    quizCount: number;
 }

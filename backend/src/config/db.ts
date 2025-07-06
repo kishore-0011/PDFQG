@@ -15,9 +15,9 @@ const pool = new Pool({
 // Function to initialize the database tables
 export const initializeDatabase = async (): Promise<void> => {
   try {
-    console.log('Connecting to database...');
-    
-    // Create users table if it doesn't exist
+    console.log('⏳ Initializing database...');
+
+    // Users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY,
@@ -28,13 +28,45 @@ export const initializeDatabase = async (): Promise<void> => {
         created_at TIMESTAMP NOT NULL,
         updated_at TIMESTAMP NOT NULL
       );
-      
-      -- Create indexes on commonly queried fields
+
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
-    
+
+    // Documents table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS documents (
+        id UUID PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        source_type VARCHAR(50) NOT NULL,
+        file_path VARCHAR(500),
+        file_size BIGINT,
+        content_text TEXT,
+        status VARCHAR(50) NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
+      CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);
+    `);
+
+    // Quizzes table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS quizzes (
+        id UUID PRIMARY KEY,
+        title TEXT NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        questions JSONB NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP
+      );
+    `);
+
+    console.log('✅ Database tables ensured.');
   } catch (error) {
+    console.error('❌ Database initialization error:', error);
     throw error;
   }
 };

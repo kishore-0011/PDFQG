@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Mail, Eye, EyeOff, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../context/use-auth";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -24,6 +26,8 @@ interface FormErrors {
   phoneOrEmail?: string;
 }
 
+
+
 const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
@@ -44,6 +48,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
   });
 
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
 
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -68,7 +73,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         newErrors.verificationCode = "Verification code required";
     } else {
       if (!formData.phoneOrEmail)
-        newErrors.phoneOrEmail = "Email or phone required";
+        newErrors.phoneOrEmail = "Email required";
       if (!formData.password) newErrors.password = "Password is required";
     }
 
@@ -81,26 +86,82 @@ const AuthModal: React.FC<AuthModalProps> = ({
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  const handleSendCode = () => {
-    if (!formData.email) {
-      setErrors((prev) => ({ ...prev, email: "Enter email to send code" }));
-      return;
-    }
-    setIsLoading(true);
-    setTimeout(() => {
-      setCodeSent(true);
-      setIsLoading(false);
-    }, 1000);
-  };
+  const handleSendCode = async () => {
+  if (!formData.email) {
+    setErrors((prev) => ({ ...prev, email: "Enter email to send code" }));
+    return;
+  }
 
-  const handleSubmit = () => {
-    if (!validateForm()) return;
+  try {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log(`${mode} form submitted`, formData);
-      setIsLoading(false);
-    }, 1500);
-  };
+    await api.post('/send-code', {
+      email: formData.email,
+      type: mode === 'signup' ? 'register' : 'reset' 
+    });
+    console.log("working")
+    setCodeSent(true);
+  } catch (error) {
+    console.error(error);
+    // optionally show feedback to user
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  try {
+    setIsLoading(true);
+
+    if (mode === 'signup') {
+      // Step 1: Verify code
+      await api.post('/verify-code', {
+        email: formData.email,
+        code: formData.verificationCode,
+        type: 'register',
+      });
+      
+      // Step 2: Register user
+      const res = await api.post('/auth/register', {
+        email: formData.email,
+        password: formData.password,
+        username: formData.email.split('@')[0], // Or a separate input field
+      });
+
+      const { token } = res.data;
+      localStorage.setItem('token', token); // Store the JWT
+
+      console.log('Registered:', res.data);
+      await refreshUser();
+      navigate('/quiz'); // Redirect or update UI
+    } else {
+      // Step 1: Login
+      const res = await api.post('/auth/login', {
+        email: formData.phoneOrEmail,
+        password: formData.password,
+      });
+
+      const { token } = res.data;
+      localStorage.setItem('token', token); // Store the JWT
+
+      console.log('Logged in:', res.data);
+      await refreshUser();
+      navigate('/quiz'); // Or another route
+    }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error(error);
+    if (error.response?.data?.message) {
+      alert(error.response.data.message);
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   const switchMode = () => {
     setMode(mode === "signup" ? "login" : "signup");
@@ -138,8 +199,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
         <div className="p-6">
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
             {mode === "signup"
-              ? "Only email registration is supported in your region."
-              : "Login via email, Google, or +86 phone is supported."}
+              ? "SignUp using email."
+              : "Login via email."}
           </div>
 
           <div className="space-y-4">
@@ -270,7 +331,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="space-y-2">
                   <input
                     type="text"
-                    placeholder="Phone number / email address"
+                    placeholder="Email address"
                     value={formData.phoneOrEmail}
                     onChange={(e) =>
                       handleInputChange("phoneOrEmail", e.target.value)

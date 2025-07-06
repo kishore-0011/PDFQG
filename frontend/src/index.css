@@ -24,3 +24,8 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+
+html.dark {
+  background-color: #1f2937; /* or your desired dark base */
+}

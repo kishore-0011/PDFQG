@@ -35,16 +35,7 @@ class DocumentController {
         res.status(400).json({ message: 'No file uploaded' });
         return;
       }
-      
-      // Validate source_type
-      // const sourceType = req.body.source_type;
-      // if (sourceType !== 'pdf') {
-      //   res.status(400).json({ message: 'Invalid source type. Must be "pdf"' });
-      //   return;
-      // }
-
-      
-      
+    
       // Validate title
       if (!req.body.title) {
         res.status(400).json({ message: 'Title is required' });
